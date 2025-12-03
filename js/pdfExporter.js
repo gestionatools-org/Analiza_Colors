@@ -167,9 +167,15 @@ export class PDFExporter {
 
             // Draw hex text below
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'normal');
+            doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 0, 0);
             doc.text(hex, xPos + boxWidth / 2, y + boxHeight + 5, { align: 'center' });
+
+            // Draw RGB text below hex
+            doc.setFontSize(6);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 100, 100);
+            doc.text(`RGB(${rgb.r},${rgb.g},${rgb.b})`, xPos + boxWidth / 2, y + boxHeight + 9, { align: 'center' });
         });
     }
 
