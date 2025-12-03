@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Generador de Paletas de Colores</h1>
+            <p class="subtitle">Descubre armonías, gradientes y colores relacionados</p>
+        </header>
+
+        <main>
+            <!-- Input Section -->
+            <section class="input-section">
+                <div class="input-tabs">
+                    <button class="tab-btn active" data-tab="hex">HEX</button>
+                    <button class="tab-btn" data-tab="rgb">RGB</button>
+                    <button class="tab-btn" data-tab="image">Imagen</button>
+                </div>
+
+                <div class="tab-content active" id="hex-tab">
+                    <input type="text" id="hex-input" placeholder="#FF5733" maxlength="7">
+                    <input type="color" id="color-picker" value="#FF5733">
+                </div>
+
+                <div class="tab-content" id="rgb-tab">
+                    <div class="rgb-inputs">
+                        <input type="number" id="r-input" placeholder="R" min="0" max="255" value="255">
+                        <input type="number" id="g-input" placeholder="G" min="0" max="255" value="87">
+                        <input type="number" id="b-input" placeholder="B" min="0" max="255" value="51">
+                    </div>
+                </div>
+
+                <div class="tab-content" id="image-tab">
+                    <div class="image-upload">
+                        <input type="file" id="image-input" accept="image/*">
+                        <label for="image-input" class="upload-label">
+                            <span>📁 Seleccionar imagen</span>
+                        </label>
+                        <canvas id="image-canvas" style="display: none;"></canvas>
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generate-btn">Generar Paleta</button>
+            </section>
+
+            <!-- Current Color Display -->
+            <section class="current-color-section">
+                <h2>Color Base</h2>
+                <div class="color-display" id="base-color">
+                    <div class="color-preview"></div>
+                    <div class="color-info">
+                        <span class="hex-value">#FF5733</span>
+                        <span class="rgb-value">RGB(255, 87, 51)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Complementary Colors -->
+            <section class="palette-section">
+                <h2>Colores Complementarios</h2>
+                <div class="color-grid" id="complementary-colors"></div>
+            </section>
+
+            <!-- Analogous Colors -->
+            <section class="palette-section">
+                <h2>Colores Análogos</h2>
+                <div class="color-grid" id="analogous-colors"></div>
+            </section>
+
+            <!-- Triadic Colors -->
+            <section class="palette-section">
+                <h2>Colores Triádicos</h2>
+                <div class="color-grid" id="triadic-colors"></div>
+            </section>
+
+            <!-- Tetradic Colors -->
+            <section class="palette-section">
+                <h2>Colores Tetrádicos</h2>
+                <div class="color-grid" id="tetradic-colors"></div>
+            </section>
+
+            <!-- Monochromatic Colors -->
+            <section class="palette-section">
+                <h2>Variaciones Monocromáticas</h2>
+                <div class="color-grid" id="monochromatic-colors"></div>
+            </section>
+
+            <!-- Gradients -->
+            <section class="gradient-section">
+                <h2>Gradientes</h2>
+                <div class="gradient-container" id="gradients"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
