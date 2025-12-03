@@ -272,19 +272,40 @@ class ColorPaletteApp {
         gradients.forEach(gradient => {
             const item = document.createElement('div');
             item.className = 'gradient-item';
-            item.style.background = gradient.css;
 
             const label = document.createElement('div');
             label.className = 'gradient-label';
             label.textContent = gradient.name;
 
-            item.appendChild(label);
+            const colorsContainer = document.createElement('div');
+            colorsContainer.className = 'gradient-colors';
 
-            // Copy gradient CSS on click
-            item.addEventListener('click', () => {
-                this.copyToClipboard(gradient.css, 'Gradiente CSS copiado');
+            // Render each of the 4 colors
+            gradient.colors.forEach(color => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'gradient-color-item';
+
+                const swatch = document.createElement('div');
+                swatch.className = 'gradient-color-swatch';
+                swatch.style.backgroundColor = color;
+
+                const hexLabel = document.createElement('div');
+                hexLabel.className = 'gradient-color-hex';
+                hexLabel.textContent = color;
+
+                colorItem.appendChild(swatch);
+                colorItem.appendChild(hexLabel);
+
+                // Copy color on click
+                colorItem.addEventListener('click', () => {
+                    this.copyToClipboard(color);
+                });
+
+                colorsContainer.appendChild(colorItem);
             });
 
+            item.appendChild(label);
+            item.appendChild(colorsContainer);
             container.appendChild(item);
         });
     }

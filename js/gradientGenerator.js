@@ -83,55 +83,54 @@ export class GradientGenerator {
         const triadic1 = ColorUtils.hslToHex((hsl.h + 120) % 360, hsl.s, hsl.l);
         const triadic2 = ColorUtils.hslToHex((hsl.h + 240) % 360, hsl.s, hsl.l);
 
+        // Additional colors for variations
+        const color60 = ColorUtils.hslToHex((hsl.h + 60) % 360, hsl.s, hsl.l);
+        const color120 = ColorUtils.hslToHex((hsl.h + 120) % 360, hsl.s, hsl.l);
+        const satLow = ColorUtils.adjustSaturation(hex, -30);
+        const satHigh = ColorUtils.adjustSaturation(hex, 30);
+
         return [
             {
-                name: 'Lineal Horizontal',
-                css: this.linear(hex, complement, 90),
-                colors: [hex, complement]
+                name: 'Complementario',
+                colors: [hex, complement, lighter, darker]
             },
             {
-                name: 'Lineal Diagonal',
-                css: this.linear(hex, complement, 45),
-                colors: [hex, complement]
-            },
-            {
-                name: 'Radial',
-                css: this.radial(hex, complement),
-                colors: [hex, complement]
-            },
-            {
-                name: 'Análogo Suave',
-                css: this.linear(analogous1, analogous2, 90),
-                colors: [analogous1, hex, analogous2]
-            },
-            {
-                name: 'Claro a Oscuro',
-                css: this.linear(lighter, darker, 180),
-                colors: [lighter, hex, darker]
+                name: 'Análogo',
+                colors: [analogous1, hex, analogous2, lighter]
             },
             {
                 name: 'Triádico',
-                css: this.multiStop([hex, triadic1, triadic2], 90),
-                colors: [hex, triadic1, triadic2]
+                colors: [hex, triadic1, triadic2, lighter]
+            },
+            {
+                name: 'Claro a Oscuro',
+                colors: [lighter, hex, darker, ColorUtils.darken(hex, 40)]
             },
             {
                 name: 'Arcoíris',
-                css: this.multiStop([
-                    hex,
-                    ColorUtils.hslToHex((hsl.h + 60) % 360, hsl.s, hsl.l),
-                    ColorUtils.hslToHex((hsl.h + 120) % 360, hsl.s, hsl.l),
-                    ColorUtils.hslToHex((hsl.h + 180) % 360, hsl.s, hsl.l)
-                ], 90),
-                colors: [hex]
+                colors: [hex, color60, color120, complement]
             },
             {
-                name: 'Saturación Variable',
-                css: this.linear(
-                    ColorUtils.adjustSaturation(hex, -30),
-                    ColorUtils.adjustSaturation(hex, 30),
-                    90
-                ),
-                colors: [hex]
+                name: 'Saturación',
+                colors: [satLow, hex, satHigh, lighter]
+            },
+            {
+                name: 'Monocromático',
+                colors: [
+                    ColorUtils.lighten(hex, 30),
+                    ColorUtils.lighten(hex, 15),
+                    ColorUtils.darken(hex, 15),
+                    ColorUtils.darken(hex, 30)
+                ]
+            },
+            {
+                name: 'Tetrádico',
+                colors: [
+                    hex,
+                    ColorUtils.hslToHex((hsl.h + 90) % 360, hsl.s, hsl.l),
+                    complement,
+                    ColorUtils.hslToHex((hsl.h + 270) % 360, hsl.s, hsl.l)
+                ]
             }
         ];
     }

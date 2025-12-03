@@ -30,8 +30,8 @@ export class LogoResizer {
     }
 
     /**
-     * Draw resized logo on canvas maintaining aspect ratio
-     * Target is 214x70 px, but one dimension may be larger to avoid deformation
+     * Draw resized logo on canvas - EXACT 214x70 px output
+     * Image is centered and scaled to fit without deforming
      * @param {HTMLImageElement} img - Source image
      * @param {HTMLCanvasElement} canvas - Target canvas
      */
@@ -39,35 +39,38 @@ export class LogoResizer {
         const targetWidth = 214;
         const targetHeight = 70;
 
-        const imgAspectRatio = img.width / img.height;
-        const targetAspectRatio = targetWidth / targetHeight; // 3.057
+        // Canvas is ALWAYS 214x70
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
 
-        let canvasWidth, canvasHeight;
-
-        // Calculate dimensions to maintain aspect ratio
-        if (imgAspectRatio > targetAspectRatio) {
-            // Image is wider relative to target
-            // Fix height to 70px, calculate width proportionally
-            canvasHeight = targetHeight;
-            canvasWidth = Math.round(canvasHeight * imgAspectRatio);
-        } else {
-            // Image is taller relative to target
-            // Fix width to 214px, calculate height proportionally
-            canvasWidth = targetWidth;
-            canvasHeight = Math.round(canvasWidth / imgAspectRatio);
-        }
-
-        // Set canvas size
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
+        const ctx = canvas.getContext('2d');
 
         // Draw white background
-        const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.fillRect(0, 0, targetWidth, targetHeight);
 
-        // Draw image filling entire canvas
-        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+        // Calculate how to fit image within 214x70 without deforming
+        const imgAspectRatio = img.width / img.height;
+        const targetAspectRatio = targetWidth / targetHeight;
+
+        let drawWidth, drawHeight, offsetX, offsetY;
+
+        if (imgAspectRatio > targetAspectRatio) {
+            // Image is wider - fit by width
+            drawWidth = targetWidth;
+            drawHeight = targetWidth / imgAspectRatio;
+            offsetX = 0;
+            offsetY = (targetHeight - drawHeight) / 2; // Center vertically
+        } else {
+            // Image is taller - fit by height
+            drawHeight = targetHeight;
+            drawWidth = targetHeight * imgAspectRatio;
+            offsetX = (targetWidth - drawWidth) / 2; // Center horizontally
+            offsetY = 0;
+        }
+
+        // Draw image centered in canvas
+        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     }
 
     /**
