@@ -95,6 +95,12 @@ class ColorPaletteApp {
             }
         });
 
+        // Paste image button
+        const pasteImageBtn = document.getElementById('paste-image-btn');
+        pasteImageBtn.addEventListener('click', async () => {
+            await this.handleImagePaste();
+        });
+
         // Logo upload
         const logoInput = document.getElementById('logo-input');
         logoInput.addEventListener('change', async (e) => {
@@ -166,6 +172,45 @@ class ColorPaletteApp {
         } catch (error) {
             console.error('Error extracting color from image:', error);
             this.showNotification('Error al procesar la imagen', 'error');
+        }
+    }
+
+    async handleImagePaste() {
+        try {
+            // Check if clipboard API is available
+            if (!navigator.clipboard || !navigator.clipboard.read) {
+                this.showNotification('Tu navegador no soporta pegar imágenes', 'error');
+                return;
+            }
+
+            // Read from clipboard
+            const clipboardItems = await navigator.clipboard.read();
+
+            for (const clipboardItem of clipboardItems) {
+                // Look for image types
+                for (const type of clipboardItem.types) {
+                    if (type.startsWith('image/')) {
+                        const blob = await clipboardItem.getType(type);
+
+                        // Convert blob to file
+                        const file = new File([blob], 'pasted-image.png', { type: blob.type });
+
+                        // Process the image
+                        await this.handleImageUpload(file);
+                        return;
+                    }
+                }
+            }
+
+            // No image found in clipboard
+            this.showNotification('No hay imagen en el portapapeles', 'error');
+        } catch (error) {
+            console.error('Error pasting image:', error);
+            if (error.name === 'NotAllowedError') {
+                this.showNotification('Permiso denegado para acceder al portapapeles', 'error');
+            } else {
+                this.showNotification('Error al pegar imagen', 'error');
+            }
         }
     }
 

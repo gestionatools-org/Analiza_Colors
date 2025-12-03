@@ -188,6 +188,31 @@ h2 {
     box-shadow: 0 4px 16px rgba(108, 99, 255, 0.4);
 }
 
+.paste-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 1.2rem 2rem;
+    background: linear-gradient(135deg, #9B59B6, #8E44AD);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.paste-btn:hover {
+    background: linear-gradient(135deg, #8E44AD, #7D3C98);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(155, 89, 182, 0.4);
+}
+
+.paste-btn:active {
+    transform: translateY(0);
+}
+
 .logo-resizer {
     text-align: center;
 }
