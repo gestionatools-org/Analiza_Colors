@@ -68,28 +68,48 @@ export class ImageColorExtractor {
         const data = imageData.data;
 
         // Extract colors using color quantization
-        const colors = this.quantizeColors(data, 5);
+        const colors = this.quantizeColors(data, 10);
 
-        // Check if the most abundant color is white or very close to white
-        // If so, return the second most abundant color
-        const mostAbundant = colors[0];
-        if (this.isWhiteColor(mostAbundant) && colors.length > 1) {
-            return colors[1]; // Return second most abundant
+        // Skip neutral colors (white, black, gray) and return the first non-neutral color
+        for (let i = 0; i < colors.length; i++) {
+            if (!this.isNeutralColor(colors[i])) {
+                return colors[i];
+            }
         }
 
-        // Return the most dominant color
-        return mostAbundant;
+        // If all colors are neutral, return the first one
+        return colors[0];
     }
 
     /**
-     * Check if a color is white or very close to white
+     * Check if a color is neutral (white, black, or gray)
      * @param {string} hex - Hex color code
-     * @returns {boolean} True if color is white-ish
+     * @returns {boolean} True if color is neutral
      */
-    static isWhiteColor(hex) {
+    static isNeutralColor(hex) {
         const rgb = ColorUtils.hexToRgb(hex);
-        // Consider white if all RGB values are above 240
-        return rgb.r >= 240 && rgb.g >= 240 && rgb.b >= 240;
+
+        // Check if it's white (all RGB > 240)
+        if (rgb.r >= 240 && rgb.g >= 240 && rgb.b >= 240) {
+            return true;
+        }
+
+        // Check if it's black (all RGB < 15)
+        if (rgb.r <= 15 && rgb.g <= 15 && rgb.b <= 15) {
+            return true;
+        }
+
+        // Check if it's gray (RGB values are similar to each other)
+        const avg = (rgb.r + rgb.g + rgb.b) / 3;
+        const variance = (
+            Math.pow(rgb.r - avg, 2) +
+            Math.pow(rgb.g - avg, 2) +
+            Math.pow(rgb.b - avg, 2)
+        ) / 3;
+
+        // If variance is low (colors are similar), it's grayscale
+        // Threshold of 300 allows for slight variations but catches most grays
+        return variance < 300;
     }
 
     /**

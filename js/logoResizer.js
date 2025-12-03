@@ -31,6 +31,7 @@ export class LogoResizer {
 
     /**
      * Draw resized logo on canvas maintaining aspect ratio
+     * Target is 214x70 px, but one dimension may be larger to avoid deformation
      * @param {HTMLImageElement} img - Source image
      * @param {HTMLCanvasElement} canvas - Target canvas
      */
@@ -39,30 +40,21 @@ export class LogoResizer {
         const targetHeight = 70;
 
         const imgAspectRatio = img.width / img.height;
-        const targetAspectRatio = targetWidth / targetHeight;
+        const targetAspectRatio = targetWidth / targetHeight; // 3.057
 
-        let canvasWidth = targetWidth;
-        let canvasHeight = targetHeight;
-        let drawWidth = targetWidth;
-        let drawHeight = targetHeight;
-        let offsetX = 0;
-        let offsetY = 0;
+        let canvasWidth, canvasHeight;
 
         // Calculate dimensions to maintain aspect ratio
         if (imgAspectRatio > targetAspectRatio) {
-            // Image is wider than target - expand canvas width
-            drawHeight = targetHeight;
-            drawWidth = drawHeight * imgAspectRatio;
-            canvasWidth = drawWidth;
-            offsetX = 0;
-            offsetY = 0;
+            // Image is wider relative to target
+            // Fix height to 70px, calculate width proportionally
+            canvasHeight = targetHeight;
+            canvasWidth = Math.round(canvasHeight * imgAspectRatio);
         } else {
-            // Image is taller than target - expand canvas height
-            drawWidth = targetWidth;
-            drawHeight = drawWidth / imgAspectRatio;
-            canvasHeight = drawHeight;
-            offsetX = 0;
-            offsetY = 0;
+            // Image is taller relative to target
+            // Fix width to 214px, calculate height proportionally
+            canvasWidth = targetWidth;
+            canvasHeight = Math.round(canvasWidth / imgAspectRatio);
         }
 
         // Set canvas size
@@ -74,8 +66,8 @@ export class LogoResizer {
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        // Draw image centered
-        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        // Draw image filling entire canvas
+        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
     }
 
     /**
