@@ -7,6 +7,7 @@ import { ColorUtils } from './colorUtils.js';
 import { ColorHarmony } from './colorHarmony.js';
 import { GradientGenerator } from './gradientGenerator.js';
 import { ImageColorExtractor } from './imageColorExtractor.js';
+import { LogoResizer } from './logoResizer.js';
 
 class ColorPaletteApp {
     constructor() {
@@ -91,6 +92,23 @@ class ColorPaletteApp {
             }
         });
 
+        // Logo upload
+        const logoInput = document.getElementById('logo-input');
+        logoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                await this.handleLogoUpload(file);
+            }
+        });
+
+        // Download logo button
+        const downloadLogoBtn = document.getElementById('download-logo-btn');
+        downloadLogoBtn.addEventListener('click', () => {
+            const canvas = document.getElementById('logo-canvas');
+            LogoResizer.downloadCanvas(canvas, 'logo_214x70.png');
+            this.showNotification('Logo descargado correctamente');
+        });
+
         // Generate button
         const generateBtn = document.getElementById('generate-btn');
         generateBtn.addEventListener('click', () => {
@@ -133,6 +151,24 @@ class ColorPaletteApp {
         } catch (error) {
             console.error('Error extracting color from image:', error);
             this.showNotification('Error al procesar la imagen', 'error');
+        }
+    }
+
+    async handleLogoUpload(file) {
+        const canvas = document.getElementById('logo-canvas');
+        const container = document.getElementById('logo-preview-container');
+
+        try {
+            await LogoResizer.resizeLogoToCanvas(file, canvas);
+
+            // Show preview container
+            container.style.display = 'block';
+
+            const info = LogoResizer.getCanvasInfo(canvas);
+            this.showNotification(`Logo redimensionado: ${info.width}x${info.height}px`);
+        } catch (error) {
+            console.error('Error resizing logo:', error);
+            this.showNotification('Error al procesar el logo', 'error');
         }
     }
 

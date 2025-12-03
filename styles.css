@@ -188,6 +188,47 @@ h2 {
     box-shadow: 0 4px 16px rgba(108, 99, 255, 0.4);
 }
 
+.logo-resizer {
+    text-align: center;
+}
+
+#logo-preview-container {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+#logo-canvas {
+    display: block;
+    margin: 0 auto 1rem;
+    border: 2px solid rgba(108, 99, 255, 0.3);
+    border-radius: 12px;
+    background: white;
+    max-width: 100%;
+    height: auto;
+}
+
+.download-btn {
+    padding: 1rem 2rem;
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.download-btn:hover {
+    background: #E5577A;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 101, 132, 0.4);
+}
+
+.download-btn:active {
+    transform: translateY(0);
+}
+
 .generate-btn {
     width: 100%;
     padding: 1.2rem;

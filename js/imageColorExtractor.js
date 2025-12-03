@@ -70,8 +70,26 @@ export class ImageColorExtractor {
         // Extract colors using color quantization
         const colors = this.quantizeColors(data, 5);
 
+        // Check if the most abundant color is white or very close to white
+        // If so, return the second most abundant color
+        const mostAbundant = colors[0];
+        if (this.isWhiteColor(mostAbundant) && colors.length > 1) {
+            return colors[1]; // Return second most abundant
+        }
+
         // Return the most dominant color
-        return colors[0];
+        return mostAbundant;
+    }
+
+    /**
+     * Check if a color is white or very close to white
+     * @param {string} hex - Hex color code
+     * @returns {boolean} True if color is white-ish
+     */
+    static isWhiteColor(hex) {
+        const rgb = ColorUtils.hexToRgb(hex);
+        // Consider white if all RGB values are above 240
+        return rgb.r >= 240 && rgb.g >= 240 && rgb.b >= 240;
     }
 
     /**
