@@ -14,18 +14,21 @@ export class PDFExporter {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
+        // Set default font to Helvetica (similar to Roboto)
+        doc.setFont('helvetica');
+
         let yPosition = 20;
 
         // Title
         doc.setFontSize(22);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.text('Paleta de Colores Corporativos', 105, yPosition, { align: 'center' });
 
-        yPosition += 10;
+        yPosition += 12;
         doc.setFontSize(18);
         doc.text(data.entityName, 105, yPosition, { align: 'center' });
 
-        yPosition += 15;
+        yPosition += 20; // Más espaciado
 
         // Add logo if exists
         if (data.logoDataURL) {
@@ -34,73 +37,48 @@ export class PDFExporter {
                 const imgHeight = 20;
                 const xPosition = (210 - imgWidth) / 2; // Center in A4 width
                 doc.addImage(data.logoDataURL, 'PNG', xPosition, yPosition, imgWidth, imgHeight);
-                yPosition += imgHeight + 10;
+                yPosition += imgHeight + 15; // Más espaciado
             } catch (error) {
                 console.error('Error adding logo to PDF:', error);
             }
         }
 
         // Main Color Section
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Color Principal', 20, yPosition);
-        yPosition += 10;
+        this.drawSectionTitle(doc, 'Color Principal', 20, yPosition);
+        yPosition += 12;
 
         this.drawColorBox(doc, data.mainColor, 20, yPosition);
-        yPosition += 25;
+        yPosition += 35; // Más espaciado entre secciones
 
         // Monochromatic Variations
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Variaciones Monocromáticas', 20, yPosition);
-        yPosition += 10;
+        this.drawSectionTitle(doc, 'Variaciones Monocromáticas', 20, yPosition);
+        yPosition += 12;
 
         this.drawColorRow(doc, data.monochromatic, 20, yPosition);
-        yPosition += 25;
+        yPosition += 35; // Más espaciado entre secciones
+
+        // Saturation palette (moved here)
+        if (data.saturation) {
+            this.drawSectionTitle(doc, 'Saturación', 20, yPosition);
+            yPosition += 12;
+
+            this.drawColorRow(doc, data.saturation, 20, yPosition);
+            yPosition += 35; // Más espaciado entre secciones
+        }
 
         // Complementary Colors
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Colores Complementarios', 20, yPosition);
-        yPosition += 10;
+        this.drawSectionTitle(doc, 'Colores Complementarios', 20, yPosition);
+        yPosition += 12;
 
         this.drawColorRow(doc, data.complementary, 20, yPosition);
         yPosition += 25;
-
-        // Check if we need a new page
-        if (yPosition > 250) {
-            doc.addPage();
-            yPosition = 20;
-        }
-
-        // Color Palettes
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Paletas de Colores', 20, yPosition);
-        yPosition += 10;
-
-        // Draw each palette
-        for (const palette of data.palettes) {
-            if (yPosition > 240) {
-                doc.addPage();
-                yPosition = 20;
-            }
-
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text(palette.name, 20, yPosition);
-            yPosition += 8;
-
-            this.drawColorRow(doc, palette.colors, 20, yPosition);
-            yPosition += 25;
-        }
 
         // Footer
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
+            doc.setFont('helvetica', 'normal');
             doc.setTextColor(128, 128, 128);
             doc.text(
                 `Generado con Color Palette Generator - Página ${i} de ${pageCount}`,
@@ -113,6 +91,26 @@ export class PDFExporter {
         // Save the PDF
         const filename = `${data.entityName.replace(/\s+/g, '_')}_Paleta_Colores.pdf`;
         doc.save(filename);
+    }
+
+    /**
+     * Draw a section title with gray underline
+     * @param {jsPDF} doc - jsPDF instance
+     * @param {string} title - Section title
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     */
+    static drawSectionTitle(doc, title, x, y) {
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text(title, x, y);
+
+        // Draw gray line below title (full width of content area)
+        const lineY = y + 2;
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.line(20, lineY, 190, lineY); // From margin to margin
     }
 
     /**
@@ -135,11 +133,11 @@ export class PDFExporter {
 
         // Draw text info
         doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
         doc.text(hex, x + 50, y + 5);
 
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.text(`RGB(${rgb.r}, ${rgb.g}, ${rgb.b})`, x + 50, y + 12);
     }
 
@@ -169,7 +167,7 @@ export class PDFExporter {
 
             // Draw hex text below
             doc.setFontSize(8);
-            doc.setFont(undefined, 'normal');
+            doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 0, 0);
             doc.text(hex, xPos + boxWidth / 2, y + boxHeight + 5, { align: 'center' });
         });
@@ -185,16 +183,16 @@ export class PDFExporter {
      * @returns {object} Prepared data object
      */
     static prepareData(entityName, mainColor, harmonies, gradients, logoDataURL = null) {
+        // Find the Saturación palette from gradients
+        const saturationPalette = gradients.find(g => g.name === 'Saturación');
+
         return {
             entityName,
             mainColor,
             logoDataURL,
             monochromatic: harmonies.monochromatic,
-            complementary: harmonies.splitComplementary,
-            palettes: gradients.map(g => ({
-                name: g.name,
-                colors: g.colors
-            }))
+            saturation: saturationPalette ? saturationPalette.colors : null,
+            complementary: harmonies.splitComplementary
         };
     }
 
