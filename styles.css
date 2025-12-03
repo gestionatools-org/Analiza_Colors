@@ -252,6 +252,29 @@ h2 {
     transform: translateY(0);
 }
 
+.export-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #2ECC71, #27AE60);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: var(--transition);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(46, 204, 113, 0.4);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
 /* Current Color Display */
 .current-color-section {
     background: var(--surface);

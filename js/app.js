@@ -8,11 +8,14 @@ import { ColorHarmony } from './colorHarmony.js';
 import { GradientGenerator } from './gradientGenerator.js';
 import { ImageColorExtractor } from './imageColorExtractor.js';
 import { LogoResizer } from './logoResizer.js';
+import { PDFExporter } from './pdfExporter.js';
 
 class ColorPaletteApp {
     constructor() {
         this.currentColor = '#FF5733';
         this.currentTab = 'hex';
+        this.currentHarmonies = null;
+        this.currentGradients = null;
         this.init();
     }
 
@@ -114,6 +117,18 @@ class ColorPaletteApp {
         generateBtn.addEventListener('click', () => {
             this.generatePalette(this.currentColor);
         });
+
+        // Export PDF button
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        exportPdfBtn.addEventListener('click', async () => {
+            const logoCanvas = document.getElementById('logo-canvas');
+            await PDFExporter.exportWithPrompt(
+                this.currentColor,
+                this.currentHarmonies,
+                this.currentGradients,
+                logoCanvas.width > 0 ? logoCanvas : null
+            );
+        });
     }
 
     switchTab(tabName) {
@@ -187,6 +202,9 @@ class ColorPaletteApp {
         // Generate harmonies
         const harmonies = ColorHarmony.all(hex);
 
+        // Store harmonies for PDF export
+        this.currentHarmonies = harmonies;
+
         // Update complementary colors
         this.renderColorGrid('complementary-colors', ColorHarmony.splitComplementary(hex));
 
@@ -203,7 +221,12 @@ class ColorPaletteApp {
         this.renderColorGrid('monochromatic-colors', harmonies.monochromatic);
 
         // Generate gradients
+        const gradients = GradientGenerator.generateVariations(hex);
+        this.currentGradients = gradients;
         this.renderGradients(hex);
+
+        // Show export PDF button
+        document.getElementById('export-pdf-btn').style.display = 'block';
     }
 
     updateBaseColor(hex) {
