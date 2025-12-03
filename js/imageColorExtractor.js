@@ -78,33 +78,35 @@ export class ImageColorExtractor {
      * Quantize colors from image data
      * @param {Uint8ClampedArray} data - Image pixel data
      * @param {number} colorCount - Number of colors to extract
-     * @returns {array} Array of hex colors
+     * @returns {array} Array of hex colors ordered by abundance (most abundant first)
      */
     static quantizeColors(data, colorCount = 5) {
         const colorMap = {};
-        const step = 4; // Sample every 4th pixel for performance
 
-        // Count color occurrences (with RGB binning for similar colors)
-        for (let i = 0; i < data.length; i += step * 4) {
-            const r = Math.round(data[i] / 10) * 10; // Bin colors
-            const g = Math.round(data[i + 1] / 10) * 10;
-            const b = Math.round(data[i + 2] / 10) * 10;
+        // Count all pixel color occurrences (with RGB binning for similar colors)
+        // Using a bin size of 5 for better precision while still grouping similar colors
+        for (let i = 0; i < data.length; i += 4) {
             const a = data[i + 3];
 
             // Skip transparent pixels
             if (a < 128) continue;
 
+            // Bin colors to group similar shades (bin size = 5 for better precision)
+            const r = Math.round(data[i] / 5) * 5;
+            const g = Math.round(data[i + 1] / 5) * 5;
+            const b = Math.round(data[i + 2] / 5) * 5;
+
             const key = `${r},${g},${b}`;
             colorMap[key] = (colorMap[key] || 0) + 1;
         }
 
-        // Sort by frequency
+        // Sort by frequency (most abundant first)
         const sortedColors = Object.entries(colorMap)
             .sort((a, b) => b[1] - a[1])
             .slice(0, colorCount);
 
-        // Convert to hex
-        return sortedColors.map(([rgb, _]) => {
+        // Convert to hex (returns array with most abundant color first)
+        return sortedColors.map(([rgb, count]) => {
             const [r, g, b] = rgb.split(',').map(Number);
             return ColorUtils.rgbToHex(r, g, b);
         });

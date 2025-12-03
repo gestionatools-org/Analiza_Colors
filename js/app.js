@@ -129,7 +129,7 @@ class ColorPaletteApp {
             document.getElementById('b-input').value = rgb.b;
 
             this.generatePalette(color);
-            this.showNotification(`Color extraído: ${color}`);
+            this.showNotification(`Color más abundante: ${color}`);
         } catch (error) {
             console.error('Error extracting color from image:', error);
             this.showNotification('Error al procesar la imagen', 'error');
