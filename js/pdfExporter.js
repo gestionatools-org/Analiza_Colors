@@ -63,6 +63,14 @@ export class PDFExporter {
         this.drawColorBox(doc, data.mainColor, 20, yPosition);
         yPosition += 35; // Más espaciado entre secciones
 
+        if (data.logoPublicUrl) {
+            this.drawSectionTitle(doc, 'URL del Logo', 20, yPosition);
+            yPosition += 12;
+
+            yPosition = this.drawWrappedText(doc, data.logoPublicUrl, 20, yPosition, 170);
+            yPosition += 12;
+        }
+
         // Monochromatic Variations
         this.drawSectionTitle(doc, 'Variaciones Monocromáticas', 20, yPosition);
         yPosition += 12;
@@ -193,6 +201,26 @@ export class PDFExporter {
     }
 
     /**
+     * Draw wrapped text and return the next Y position
+     * @param {jsPDF} doc - jsPDF instance
+     * @param {string} text - Text content
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     * @param {number} maxWidth - Maximum text width
+     * @returns {number} Next Y position
+     */
+    static drawWrappedText(doc, text, x, y, maxWidth) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
+
+        const lines = doc.splitTextToSize(text, maxWidth);
+        doc.text(lines, x, y);
+
+        return y + (lines.length * 5);
+    }
+
+    /**
      * Prepare data for PDF export
      * @param {string} entityName - Name of the entity
      * @param {string} mainColor - Main hex color
@@ -201,13 +229,22 @@ export class PDFExporter {
      * @param {string} logoDataURL - Optional logo data URL
      * @returns {object} Prepared data object
      */
-    static prepareData(entityName, mainColor, harmonies, gradients, logoDataURL = null, logoDimensions = null) {
+    static prepareData(
+        entityName,
+        mainColor,
+        harmonies,
+        gradients,
+        logoPublicUrl = '',
+        logoDataURL = null,
+        logoDimensions = null
+    ) {
         // Find the Saturación palette from gradients
         const saturationPalette = gradients.find(g => g.name === 'Saturación');
 
         return {
             entityName,
             mainColor,
+            logoPublicUrl,
             logoDataURL,
             logoWidth: logoDimensions?.width || null,
             logoHeight: logoDimensions?.height || null,
@@ -222,10 +259,18 @@ export class PDFExporter {
      * @param {string} mainColor - Main hex color
      * @param {object} harmonies - Color harmonies object
      * @param {array} gradients - Gradient variations
+     * @param {string} logoPublicUrl - Optional public logo URL
      * @param {File|null} logoFile - Optional original logo file
      * @param {HTMLCanvasElement} logoCanvas - Optional resized logo canvas fallback
      */
-    static async exportWithPrompt(mainColor, harmonies, gradients, logoFile = null, logoCanvas = null) {
+    static async exportWithPrompt(
+        mainColor,
+        harmonies,
+        gradients,
+        logoPublicUrl = '',
+        logoFile = null,
+        logoCanvas = null
+    ) {
         // Prompt for entity name
         const entityName = prompt('Ingrese el nombre de la entidad:', 'Mi Empresa');
 
@@ -261,7 +306,15 @@ export class PDFExporter {
         }
 
         // Prepare data
-        const data = this.prepareData(entityName, mainColor, harmonies, gradients, logoDataURL, logoDimensions);
+        const data = this.prepareData(
+            entityName,
+            mainColor,
+            harmonies,
+            gradients,
+            logoPublicUrl,
+            logoDataURL,
+            logoDimensions
+        );
 
         // Generate PDF
         await this.generatePDF(data);

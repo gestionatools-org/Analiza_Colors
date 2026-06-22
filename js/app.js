@@ -17,6 +17,7 @@ class ColorPaletteApp {
         this.currentHarmonies = null;
         this.currentGradients = null;
         this.currentLogoFile = null;
+        this.currentLogoUrl = '';
         this.init();
     }
 
@@ -111,6 +112,11 @@ class ColorPaletteApp {
             }
         });
 
+        const logoUrlInput = document.getElementById('logo-url-input');
+        logoUrlInput.addEventListener('input', (e) => {
+            this.currentLogoUrl = e.target.value.trim();
+        });
+
         // Download logo button
         const downloadLogoBtn = document.getElementById('download-logo-btn');
         downloadLogoBtn.addEventListener('click', () => {
@@ -133,6 +139,7 @@ class ColorPaletteApp {
                 this.currentColor,
                 this.currentHarmonies,
                 this.currentGradients,
+                this.currentLogoUrl,
                 this.currentLogoFile,
                 logoCanvas.width > 0 ? logoCanvas : null
             );

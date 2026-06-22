@@ -217,6 +217,35 @@ h2 {
     text-align: center;
 }
 
+.logo-url-group {
+    margin-top: 1.5rem;
+    text-align: left;
+}
+
+.logo-url-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.logo-url-input {
+    width: 100%;
+    padding: 1rem;
+    background: var(--background);
+    border: 2px solid rgba(108, 99, 255, 0.3);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.logo-url-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+}
+
 #logo-preview-container {
     margin-top: 1.5rem;
     text-align: center;
