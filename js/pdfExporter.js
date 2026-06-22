@@ -50,10 +50,22 @@ export class PDFExporter {
 
                 const xPosition = (210 - imgWidth) / 2; // Center in A4 width
                 doc.addImage(data.logoDataURL, 'PNG', xPosition, yPosition, imgWidth, imgHeight);
-                yPosition += imgHeight + 15; // Más espaciado
+
+                if (data.logoPublicUrl) {
+                    const urlY = yPosition + imgHeight + 8;
+                    this.drawCenteredWrappedText(doc, data.logoPublicUrl, 105, urlY, 170);
+                    yPosition = urlY + (this.getWrappedLineCount(doc, data.logoPublicUrl, 170) * 5) + 10;
+                } else {
+                    yPosition += imgHeight + 15; // Más espaciado
+                }
             } catch (error) {
                 console.error('Error adding logo to PDF:', error);
             }
+        } else if (data.logoPublicUrl) {
+            this.drawSectionTitle(doc, 'URL del Logo', 20, yPosition);
+            yPosition += 12;
+            yPosition = this.drawWrappedText(doc, data.logoPublicUrl, 20, yPosition, 170);
+            yPosition += 12;
         }
 
         // Main Color Section
@@ -62,14 +74,6 @@ export class PDFExporter {
 
         this.drawColorBox(doc, data.mainColor, 20, yPosition);
         yPosition += 35; // Más espaciado entre secciones
-
-        if (data.logoPublicUrl) {
-            this.drawSectionTitle(doc, 'URL del Logo', 20, yPosition);
-            yPosition += 12;
-
-            yPosition = this.drawWrappedText(doc, data.logoPublicUrl, 20, yPosition, 170);
-            yPosition += 12;
-        }
 
         // Monochromatic Variations
         this.drawSectionTitle(doc, 'Variaciones Monocromáticas', 20, yPosition);
@@ -218,6 +222,34 @@ export class PDFExporter {
         doc.text(lines, x, y);
 
         return y + (lines.length * 5);
+    }
+
+    /**
+     * Draw centered wrapped text
+     * @param {jsPDF} doc - jsPDF instance
+     * @param {string} text - Text content
+     * @param {number} centerX - Center X position
+     * @param {number} y - Y position
+     * @param {number} maxWidth - Maximum text width
+     */
+    static drawCenteredWrappedText(doc, text, centerX, y, maxWidth) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
+
+        const lines = doc.splitTextToSize(text, maxWidth);
+        doc.text(lines, centerX, y, { align: 'center' });
+    }
+
+    /**
+     * Get wrapped line count for a text block
+     * @param {jsPDF} doc - jsPDF instance
+     * @param {string} text - Text content
+     * @param {number} maxWidth - Maximum text width
+     * @returns {number} Number of wrapped lines
+     */
+    static getWrappedLineCount(doc, text, maxWidth) {
+        return doc.splitTextToSize(text, maxWidth).length;
     }
 
     /**
