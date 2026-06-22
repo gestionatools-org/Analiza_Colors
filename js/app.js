@@ -268,7 +268,7 @@ class ColorPaletteApp {
         // Generate gradients
         const gradients = GradientGenerator.generateVariations(hex);
         this.currentGradients = gradients;
-        this.renderGradients(hex);
+        this.renderGradients();
 
         // Show export PDF button
         document.getElementById('export-pdf-btn').style.display = 'block';
@@ -331,13 +331,13 @@ class ColorPaletteApp {
         return card;
     }
 
-    renderGradients(hex) {
+    renderGradients() {
         const container = document.getElementById('gradients');
         container.innerHTML = '';
 
-        const gradients = GradientGenerator.generateVariations(hex);
+        const gradients = this.currentGradients || [];
 
-        gradients.forEach(gradient => {
+        gradients.forEach((gradient, gradientIndex) => {
             const item = document.createElement('div');
             item.className = 'gradient-item';
 
@@ -349,7 +349,7 @@ class ColorPaletteApp {
             colorsContainer.className = 'gradient-colors';
 
             // Render each of the 4 colors
-            gradient.colors.forEach(color => {
+            gradient.colors.forEach((color, colorIndex) => {
                 const colorItem = document.createElement('div');
                 colorItem.className = 'gradient-color-item';
 
@@ -361,14 +361,44 @@ class ColorPaletteApp {
                 hexLabel.className = 'gradient-color-hex';
                 hexLabel.textContent = color;
 
-                colorItem.appendChild(swatch);
-                colorItem.appendChild(hexLabel);
+                const actions = document.createElement('div');
+                actions.className = 'gradient-color-actions';
 
-                // Copy color on click
-                colorItem.addEventListener('click', () => {
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'gradient-action-btn';
+                copyBtn.type = 'button';
+                copyBtn.textContent = 'Copiar';
+                copyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     this.copyToClipboard(color);
                 });
 
+                const editBtn = document.createElement('button');
+                editBtn.className = 'gradient-action-btn gradient-edit-btn';
+                editBtn.type = 'button';
+                editBtn.textContent = 'Editar';
+
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.className = 'gradient-color-input';
+                colorInput.value = color;
+
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    colorInput.click();
+                });
+
+                colorInput.addEventListener('input', (e) => {
+                    this.updateGradientColor(gradientIndex, colorIndex, e.target.value.toUpperCase());
+                });
+
+                actions.appendChild(copyBtn);
+                actions.appendChild(editBtn);
+
+                colorItem.appendChild(swatch);
+                colorItem.appendChild(hexLabel);
+                colorItem.appendChild(actions);
+                colorItem.appendChild(colorInput);
                 colorsContainer.appendChild(colorItem);
             });
 
@@ -376,6 +406,16 @@ class ColorPaletteApp {
             item.appendChild(colorsContainer);
             container.appendChild(item);
         });
+    }
+
+    updateGradientColor(gradientIndex, colorIndex, newColor) {
+        if (!this.currentGradients?.[gradientIndex]?.colors?.[colorIndex]) {
+            return;
+        }
+
+        this.currentGradients[gradientIndex].colors[colorIndex] = newColor;
+        this.renderGradients();
+        this.showNotification(`Color actualizado a ${newColor}`);
     }
 
     copyToClipboard(text, message = 'Color copiado al portapapeles') {

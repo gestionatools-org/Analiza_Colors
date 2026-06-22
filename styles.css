@@ -445,7 +445,6 @@ h2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
     transition: var(--transition);
 }
 
@@ -465,6 +464,44 @@ h2 {
     font-size: 0.75rem;
     color: var(--text-secondary);
     font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.gradient-color-actions {
+    display: flex;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.gradient-action-btn {
+    flex: 1;
+    padding: 0.45rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(108, 99, 255, 0.18);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.gradient-action-btn:hover {
+    background: rgba(108, 99, 255, 0.32);
+}
+
+.gradient-edit-btn {
+    background: rgba(255, 101, 132, 0.18);
+}
+
+.gradient-edit-btn:hover {
+    background: rgba(255, 101, 132, 0.32);
+}
+
+.gradient-color-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Copy Notification */
@@ -552,5 +589,9 @@ h2 {
 
     .rgb-inputs {
         grid-template-columns: 1fr;
+    }
+
+    .gradient-colors {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
