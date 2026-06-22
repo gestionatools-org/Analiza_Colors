@@ -401,6 +401,43 @@ h2 {
     color: var(--text-secondary);
 }
 
+.color-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0 1rem 1rem;
+}
+
+.color-card-action-btn {
+    flex: 1;
+    padding: 0.5rem 0.6rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(108, 99, 255, 0.18);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.color-card-action-btn:hover {
+    background: rgba(108, 99, 255, 0.32);
+}
+
+.color-card-edit-btn {
+    background: rgba(255, 101, 132, 0.18);
+}
+
+.color-card-edit-btn:hover {
+    background: rgba(255, 101, 132, 0.32);
+}
+
+.color-card-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* Gradient Section */
 .gradient-section {
     background: var(--surface);

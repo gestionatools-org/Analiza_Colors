@@ -16,6 +16,7 @@ class ColorPaletteApp {
         this.currentTab = 'hex';
         this.currentHarmonies = null;
         this.currentGradients = null;
+        this.currentLogoFile = null;
         this.init();
     }
 
@@ -132,6 +133,7 @@ class ColorPaletteApp {
                 this.currentColor,
                 this.currentHarmonies,
                 this.currentGradients,
+                this.currentLogoFile,
                 logoCanvas.width > 0 ? logoCanvas : null
             );
         });
@@ -219,6 +221,7 @@ class ColorPaletteApp {
         const container = document.getElementById('logo-preview-container');
 
         try {
+            this.currentLogoFile = file;
             await LogoResizer.resizeLogoToCanvas(file, canvas);
 
             // Show preview container
@@ -251,7 +254,12 @@ class ColorPaletteApp {
         this.currentHarmonies = harmonies;
 
         // Update complementary colors
-        this.renderColorGrid('complementary-colors', ColorHarmony.splitComplementary(hex));
+        this.renderColorGrid('complementary-colors', harmonies.splitComplementary, {
+            editable: true,
+            onEdit: (index, newColor) => {
+                this.updateHarmonyColor('splitComplementary', index, newColor);
+            }
+        });
 
         // Update analogous colors
         this.renderColorGrid('analogous-colors', harmonies.analogous);
@@ -287,17 +295,17 @@ class ColorPaletteApp {
         rgbValue.textContent = `RGB(${rgb.r}, ${rgb.g}, ${rgb.b})`;
     }
 
-    renderColorGrid(containerId, colors) {
+    renderColorGrid(containerId, colors, options = {}) {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
 
-        colors.forEach(color => {
-            const card = this.createColorCard(color);
+        colors.forEach((color, index) => {
+            const card = this.createColorCard(color, options, index);
             container.appendChild(card);
         });
     }
 
-    createColorCard(hex) {
+    createColorCard(hex, options = {}, index = 0) {
         const card = document.createElement('div');
         card.className = 'color-card';
 
@@ -323,12 +331,65 @@ class ColorPaletteApp {
         card.appendChild(swatch);
         card.appendChild(details);
 
-        // Copy to clipboard on click
-        card.addEventListener('click', () => {
-            this.copyToClipboard(hex);
-        });
+        if (options.editable) {
+            const actions = document.createElement('div');
+            actions.className = 'color-card-actions';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'color-card-action-btn';
+            copyBtn.type = 'button';
+            copyBtn.textContent = 'Copiar';
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.copyToClipboard(hex);
+            });
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'color-card-action-btn color-card-edit-btn';
+            editBtn.type = 'button';
+            editBtn.textContent = 'Editar';
+
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.className = 'color-card-input';
+            colorInput.value = hex;
+
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                colorInput.click();
+            });
+
+            colorInput.addEventListener('input', (e) => {
+                options.onEdit?.(index, e.target.value.toUpperCase());
+            });
+
+            actions.appendChild(copyBtn);
+            actions.appendChild(editBtn);
+            card.appendChild(actions);
+            card.appendChild(colorInput);
+        } else {
+            // Copy to clipboard on click
+            card.addEventListener('click', () => {
+                this.copyToClipboard(hex);
+            });
+        }
 
         return card;
+    }
+
+    updateHarmonyColor(harmonyKey, colorIndex, newColor) {
+        if (!this.currentHarmonies?.[harmonyKey]?.[colorIndex]) {
+            return;
+        }
+
+        this.currentHarmonies[harmonyKey][colorIndex] = newColor;
+        this.renderColorGrid('complementary-colors', this.currentHarmonies[harmonyKey], {
+            editable: true,
+            onEdit: (index, updatedColor) => {
+                this.updateHarmonyColor(harmonyKey, index, updatedColor);
+            }
+        });
+        this.showNotification(`Color actualizado a ${newColor}`);
     }
 
     renderGradients() {

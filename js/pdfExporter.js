@@ -4,6 +4,7 @@
  */
 
 import { ColorUtils } from './colorUtils.js';
+import { LogoResizer } from './logoResizer.js';
 
 export class PDFExporter {
     /**
@@ -33,8 +34,20 @@ export class PDFExporter {
         // Add logo if exists
         if (data.logoDataURL) {
             try {
-                const imgWidth = 60;
-                const imgHeight = 20;
+                const maxLogoWidth = 100;
+                const maxLogoHeight = 32;
+                const logoAspectRatio = data.logoWidth && data.logoHeight
+                    ? data.logoWidth / data.logoHeight
+                    : maxLogoWidth / maxLogoHeight;
+
+                let imgWidth = maxLogoWidth;
+                let imgHeight = imgWidth / logoAspectRatio;
+
+                if (imgHeight > maxLogoHeight) {
+                    imgHeight = maxLogoHeight;
+                    imgWidth = imgHeight * logoAspectRatio;
+                }
+
                 const xPosition = (210 - imgWidth) / 2; // Center in A4 width
                 doc.addImage(data.logoDataURL, 'PNG', xPosition, yPosition, imgWidth, imgHeight);
                 yPosition += imgHeight + 15; // Más espaciado
@@ -67,7 +80,7 @@ export class PDFExporter {
         }
 
         // Complementary Colors
-        this.drawSectionTitle(doc, 'Colores Complementarios', 20, yPosition);
+        this.drawSectionTitle(doc, 'Complementarios/Secundarios', 20, yPosition);
         yPosition += 12;
 
         this.drawColorRow(doc, data.complementary, 20, yPosition);
@@ -188,7 +201,7 @@ export class PDFExporter {
      * @param {string} logoDataURL - Optional logo data URL
      * @returns {object} Prepared data object
      */
-    static prepareData(entityName, mainColor, harmonies, gradients, logoDataURL = null) {
+    static prepareData(entityName, mainColor, harmonies, gradients, logoDataURL = null, logoDimensions = null) {
         // Find the Saturación palette from gradients
         const saturationPalette = gradients.find(g => g.name === 'Saturación');
 
@@ -196,6 +209,8 @@ export class PDFExporter {
             entityName,
             mainColor,
             logoDataURL,
+            logoWidth: logoDimensions?.width || null,
+            logoHeight: logoDimensions?.height || null,
             monochromatic: harmonies.monochromatic,
             saturation: saturationPalette ? saturationPalette.colors : null,
             complementary: harmonies.splitComplementary
@@ -207,9 +222,10 @@ export class PDFExporter {
      * @param {string} mainColor - Main hex color
      * @param {object} harmonies - Color harmonies object
      * @param {array} gradients - Gradient variations
-     * @param {HTMLCanvasElement} logoCanvas - Optional logo canvas
+     * @param {File|null} logoFile - Optional original logo file
+     * @param {HTMLCanvasElement} logoCanvas - Optional resized logo canvas fallback
      */
-    static async exportWithPrompt(mainColor, harmonies, gradients, logoCanvas = null) {
+    static async exportWithPrompt(mainColor, harmonies, gradients, logoFile = null, logoCanvas = null) {
         // Prompt for entity name
         const entityName = prompt('Ingrese el nombre de la entidad:', 'Mi Empresa');
 
@@ -219,16 +235,33 @@ export class PDFExporter {
 
         // Get logo data URL if canvas exists and has content
         let logoDataURL = null;
-        if (logoCanvas && logoCanvas.width > 0 && logoCanvas.height > 0) {
+        let logoDimensions = null;
+
+        if (logoFile) {
+            try {
+                const renderedLogo = await LogoResizer.generateDataUrl(logoFile);
+                logoDataURL = renderedLogo.dataURL;
+                logoDimensions = {
+                    width: renderedLogo.width,
+                    height: renderedLogo.height
+                };
+            } catch (error) {
+                console.error('Error getting logo data:', error);
+            }
+        } else if (logoCanvas && logoCanvas.width > 0 && logoCanvas.height > 0) {
             try {
                 logoDataURL = logoCanvas.toDataURL('image/png');
+                logoDimensions = {
+                    width: logoCanvas.width,
+                    height: logoCanvas.height
+                };
             } catch (error) {
                 console.error('Error getting logo data:', error);
             }
         }
 
         // Prepare data
-        const data = this.prepareData(entityName, mainColor, harmonies, gradients, logoDataURL);
+        const data = this.prepareData(entityName, mainColor, harmonies, gradients, logoDataURL, logoDimensions);
 
         // Generate PDF
         await this.generatePDF(data);

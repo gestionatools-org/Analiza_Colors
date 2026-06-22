@@ -38,8 +38,18 @@ export class LogoResizer {
     static drawResizedLogo(img, canvas) {
         const targetWidth = 214;
         const targetHeight = 70;
+        this.drawLogoToFit(img, canvas, targetWidth, targetHeight);
+    }
 
-        // Canvas is ALWAYS 214x70
+    /**
+     * Render a logo into a canvas of arbitrary size while preserving aspect ratio
+     * @param {HTMLImageElement} img - Source image
+     * @param {HTMLCanvasElement} canvas - Target canvas
+     * @param {number} targetWidth - Target canvas width
+     * @param {number} targetHeight - Target canvas height
+     */
+    static drawLogoToFit(img, canvas, targetWidth, targetHeight) {
+        // Canvas is ALWAYS the requested size
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
@@ -71,6 +81,37 @@ export class LogoResizer {
 
         // Draw image centered in canvas
         ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    }
+
+    /**
+     * Generate a high-resolution data URL for PDF embedding
+     * @param {File} file - Source logo file
+     * @param {number} targetWidth - Target canvas width
+     * @param {number} targetHeight - Target canvas height
+     * @returns {Promise<object>} PNG data URL and canvas dimensions
+     */
+    static async generateDataUrl(file, targetWidth = 428, targetHeight = 140) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    this.drawLogoToFit(img, canvas, targetWidth, targetHeight);
+                    resolve({
+                        dataURL: canvas.toDataURL('image/png'),
+                        width: canvas.width,
+                        height: canvas.height
+                    });
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     }
 
     /**
