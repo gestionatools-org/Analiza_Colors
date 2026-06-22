@@ -104,21 +104,6 @@ export class PDFExporter {
         this.drawColorRow(doc, data.complementary, 20, yPosition);
         yPosition += 25;
 
-        // Footer
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(128, 128, 128);
-            doc.text(
-                `Generado con Color Palette Generator - Página ${i} de ${pageCount}`,
-                105,
-                287,
-                { align: 'center' }
-            );
-        }
-
         // Save the PDF
         const filename = `${data.entityName.replace(/\s+/g, '_')}_Paleta_Colores.pdf`;
         doc.save(filename);
