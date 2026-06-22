@@ -52,7 +52,13 @@ export class PDFExporter {
                 doc.addImage(data.logoDataURL, 'PNG', xPosition, yPosition, imgWidth, imgHeight);
 
                 if (data.logoPublicUrl) {
-                    const urlY = yPosition + imgHeight + 8;
+                    const headerY = yPosition + imgHeight + 8;
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(0, 0, 0);
+                    doc.text('URL del Logo', 105, headerY, { align: 'center' });
+
+                    const urlY = headerY + 8;
                     this.drawCenteredWrappedText(doc, data.logoPublicUrl, 105, urlY, 170);
                     yPosition = urlY + (this.getWrappedLineCount(doc, data.logoPublicUrl, 170) * 5) + 10;
                 } else {
